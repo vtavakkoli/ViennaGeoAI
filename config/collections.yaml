@@ -5,7 +5,7 @@ collections:
     provider: wfs
     wfs_url: https://data.wien.gv.at/daten/geo
     wfs_type_name: ogdwien:SPIELPLATZPUNKTOGD
-    wfs_version: 1.0.0
+    wfs_version: 1.1.0
     wfs_srs_name: EPSG:4326
     wfs_output_format: application/json
     geometry_type: Point
@@ -20,7 +20,7 @@ collections:
     provider: wfs
     wfs_url: https://data.wien.gv.at/daten/geo
     wfs_type_name: ogdwien:SCHULEOGD
-    wfs_version: 1.0.0
+    wfs_version: 1.1.0
     wfs_srs_name: EPSG:4326
     wfs_output_format: application/json
     geometry_type: Point
@@ -35,7 +35,7 @@ collections:
     provider: wfs
     wfs_url: https://data.wien.gv.at/daten/geo
     wfs_type_name: ogdwien:FAHRRADABSTELLANLAGEOGD
-    wfs_version: 1.0.0
+    wfs_version: 1.1.0
     wfs_srs_name: EPSG:4326
     wfs_output_format: application/json
     geometry_type: Point
@@ -50,7 +50,7 @@ collections:
     provider: wfs
     wfs_url: https://data.wien.gv.at/daten/geo
     wfs_type_name: ogdwien:TRINKBRUNNENOGD
-    wfs_version: 1.0.0
+    wfs_version: 1.1.0
     wfs_srs_name: EPSG:4326
     wfs_output_format: application/json
     geometry_type: Point
@@ -65,7 +65,7 @@ collections:
     provider: wfs
     wfs_url: https://data.wien.gv.at/daten/geo
     wfs_type_name: ogdwien:SCHWIMMBADOGD
-    wfs_version: 1.0.0
+    wfs_version: 1.1.0
     wfs_srs_name: EPSG:4326
     wfs_output_format: application/json
     geometry_type: Point
