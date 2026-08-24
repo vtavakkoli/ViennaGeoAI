@@ -1,0 +1,75 @@
+collections:
+  - id: playgrounds
+    title: Vienna Playgrounds
+    description: Public playground locations published by the City of Vienna Open Government Data service.
+    provider: wfs
+    wfs_url: https://data.wien.gv.at/daten/geo
+    wfs_type_name: ogdwien:SPIELPLATZOGD
+    wfs_version: 2.0.0
+    wfs_srs_name: EPSG:4326
+    wfs_output_format: application/json
+    geometry_type: Point
+    srid: 4326
+    properties: [TYP_DETAIL, SPIELPLATZ_DETAIL, STANDORT, BEZIRK]
+    default_limit: 100
+    max_limit: 5000
+
+  - id: schools
+    title: Vienna Schools
+    description: School locations in Vienna from the official Open Government Data WFS.
+    provider: wfs
+    wfs_url: https://data.wien.gv.at/daten/geo
+    wfs_type_name: ogdwien:SCHULEOGD
+    wfs_version: 2.0.0
+    wfs_srs_name: EPSG:4326
+    wfs_output_format: application/json
+    geometry_type: Point
+    srid: 4326
+    properties: [NAME, ADRESSE, BEZIRK, ART_TXT, BETREUUNG, WEBLINK1]
+    default_limit: 100
+    max_limit: 5000
+
+  - id: bicycle_parking
+    title: Bicycle Parking
+    description: Bicycle parking facilities published by the City of Vienna.
+    provider: wfs
+    wfs_url: https://data.wien.gv.at/daten/geo
+    wfs_type_name: ogdwien:FAHRRADABSTELLANLAGEOGD
+    wfs_version: 2.0.0
+    wfs_srs_name: EPSG:4326
+    wfs_output_format: application/json
+    geometry_type: Point
+    srid: 4326
+    properties: [ADRESSE, BEZIRK, ANZAHL]
+    default_limit: 200
+    max_limit: 5000
+
+  - id: drinking_fountains
+    title: Drinking Fountains
+    description: Public drinking-water and cooling facilities in Vienna.
+    provider: wfs
+    wfs_url: https://data.wien.gv.at/daten/geo
+    wfs_type_name: ogdwien:TRINKBRUNNENOGD
+    wfs_version: 2.0.0
+    wfs_srs_name: EPSG:4326
+    wfs_output_format: application/json
+    geometry_type: Point
+    srid: 4326
+    properties: [NAME, BASIS_TYP_TXT, GEB_BEZIRK, NAME_STR, ONR_VON, PLZ]
+    default_limit: 200
+    max_limit: 5000
+
+  - id: swimming_pools
+    title: Swimming Pools
+    description: Public swimming-pool locations from Vienna Open Government Data.
+    provider: wfs
+    wfs_url: https://data.wien.gv.at/daten/geo
+    wfs_type_name: ogdwien:SCHWIMMBADOGD
+    wfs_version: 2.0.0
+    wfs_srs_name: EPSG:4326
+    wfs_output_format: application/json
+    geometry_type: Point
+    srid: 4326
+    properties: [NAME, ADRESSE, BEZIRK, WEBLINK1, WEBLINK2]
+    default_limit: 100
+    max_limit: 2000

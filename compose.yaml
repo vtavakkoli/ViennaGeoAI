@@ -1,0 +1,70 @@
+name: vienna-geoai
+
+services:
+  postgis:
+    image: postgis/postgis:17-3.5
+    environment:
+      POSTGRES_DB: pogeo
+      POSTGRES_USER: pogeo
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pogeo}
+    volumes:
+      - postgis-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pogeo -d pogeo"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+    security_opt:
+      - no-new-privileges:true
+    init: true
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      args:
+        POGEO_REF: ${POGEO_REF:-master}
+    environment:
+      POGEO_APP_NAME: ViennaGeoAI
+      POGEO_ENVIRONMENT: ${POGEO_ENVIRONMENT:-development}
+      POGEO_DATABASE_URL: postgresql://pogeo:${POSTGRES_PASSWORD:-pogeo}@postgis:5432/pogeo
+      POGEO_DATABASE_POOL_MIN_SIZE: 1
+      POGEO_DATABASE_POOL_MAX_SIZE: 5
+      POGEO_CATALOG_PATH: /app/config/collections.yaml
+      POGEO_WEB_PATH: /app/web
+      POGEO_OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      POGEO_OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma4:31b-cloud}
+      POGEO_OLLAMA_TIMEOUT_SECONDS: ${OLLAMA_TIMEOUT_SECONDS:-300}
+      POGEO_WFS_TIMEOUT_SECONDS: ${WFS_TIMEOUT_SECONDS:-30}
+      POGEO_MAX_FEATURES: ${MAX_FEATURES:-5000}
+      POGEO_MAX_TOOL_ITERATIONS: ${MAX_TOOL_ITERATIONS:-6}
+      POGEO_CORS_ORIGINS: http://localhost:${APP_PORT:-8080}
+    depends_on:
+      postgis:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "${APP_PORT:-8080}:8000"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()"
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    init: true
+    stop_grace_period: 15s
+    restart: unless-stopped
+
+volumes:
+  postgis-data:
