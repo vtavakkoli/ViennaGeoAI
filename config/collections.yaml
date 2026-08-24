@@ -5,12 +5,12 @@ collections:
     provider: wfs
     wfs_url: https://data.wien.gv.at/daten/geo
     wfs_type_name: ogdwien:SPIELPLATZOGD
-    wfs_version: 1.1.0
+    wfs_version: 2.0.0
     wfs_srs_name: EPSG:4326
-    wfs_output_format: json
+    wfs_output_format: application/json
     geometry_type: Point
     srid: 4326
-    properties: [NAME, ADRESSE, BEZIRK, WEBLINK1]
+    properties: [TYP_DETAIL, SPIELPLATZ_DETAIL, STANDORT, BEZIRK]
     default_limit: 100
     max_limit: 5000
 
@@ -20,12 +20,12 @@ collections:
     provider: wfs
     wfs_url: https://data.wien.gv.at/daten/geo
     wfs_type_name: ogdwien:SCHULEOGD
-    wfs_version: 1.1.0
+    wfs_version: 2.0.0
     wfs_srs_name: EPSG:4326
-    wfs_output_format: json
+    wfs_output_format: application/json
     geometry_type: Point
     srid: 4326
-    properties: [NAME, ADRESSE, BEZIRK, WEBLINK1]
+    properties: [NAME, ADRESSE, BEZIRK, ART_TXT, BETREUUNG, WEBLINK1]
     default_limit: 100
     max_limit: 5000
 
@@ -35,12 +35,12 @@ collections:
     provider: wfs
     wfs_url: https://data.wien.gv.at/daten/geo
     wfs_type_name: ogdwien:FAHRRADABSTELLANLAGEOGD
-    wfs_version: 1.1.0
+    wfs_version: 2.0.0
     wfs_srs_name: EPSG:4326
-    wfs_output_format: json
+    wfs_output_format: application/json
     geometry_type: Point
     srid: 4326
-    properties: [BEZIRK, ANZAHL]
+    properties: [ADRESSE, BEZIRK, ANZAHL]
     default_limit: 200
     max_limit: 5000
 
@@ -50,12 +50,12 @@ collections:
     provider: wfs
     wfs_url: https://data.wien.gv.at/daten/geo
     wfs_type_name: ogdwien:TRINKBRUNNENOGD
-    wfs_version: 1.1.0
+    wfs_version: 2.0.0
     wfs_srs_name: EPSG:4326
-    wfs_output_format: json
+    wfs_output_format: application/json
     geometry_type: Point
     srid: 4326
-    properties: [BASIS_TYP_TXT, BEZIRK]
+    properties: [NAME, BASIS_TYP_TXT, GEB_BEZIRK, NAME_STR, ONR_VON, PLZ]
     default_limit: 200
     max_limit: 5000
 
@@ -65,11 +65,11 @@ collections:
     provider: wfs
     wfs_url: https://data.wien.gv.at/daten/geo
     wfs_type_name: ogdwien:SCHWIMMBADOGD
-    wfs_version: 1.1.0
+    wfs_version: 2.0.0
     wfs_srs_name: EPSG:4326
-    wfs_output_format: json
+    wfs_output_format: application/json
     geometry_type: Point
     srid: 4326
-    properties: [NAME, ADRESSE, BEZIRK, WEBLINK1]
+    properties: [NAME, ADRESSE, BEZIRK, WEBLINK1, WEBLINK2]
     default_limit: 100
     max_limit: 2000
