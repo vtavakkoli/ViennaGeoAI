@@ -48,7 +48,9 @@ The model never receives arbitrary SQL or arbitrary WFS URLs. Sources, feature t
 
 ## Included Vienna data layers
 
-ViennaGeoAI currently uses Vienna WFS 1.1.0 with GeoJSON (`application/json`). The layer identifiers below are verified against the live Vienna WFS capabilities in August 2026.
+ViennaGeoAI uses Vienna WFS **1.1.0** with GeoJSON (`application/json`). The City of Vienna GetCapabilities document advertises both WFS 1.0.0 and 1.1.0, identifies 1.1.0 as the service version, and explicitly advertises `application/json` and `json` for `GetFeature`. For spatial queries PoGeo sends a CRS-qualified WFS 1.1 BBOX such as `16.30,48.17,16.44,48.27,EPSG:4326`; this is the form verified to return the expected Vienna features.
+
+The layer identifiers below were verified against the current Vienna WFS capabilities in August 2026.
 
 | Layer | Vienna WFS feature type |
 |---|---|
@@ -249,7 +251,7 @@ curl http://localhost:8080/health
 curl http://localhost:8080/collections
 ```
 
-The GitHub Actions workflow validates Compose, builds the application image from PoGeo `master`, waits for the stack health checks, verifies the configured Vienna collections, performs a live Vienna WFS query, and checks that the UI is served.
+The GitHub Actions workflow validates Compose, builds the application image from PoGeo `master`, waits for the stack health checks, verifies the configured Vienna collections, performs a live Vienna WFS 1.1 query through PoGeo, and checks that the UI is served.
 
 ## PoGeo relationship
 
