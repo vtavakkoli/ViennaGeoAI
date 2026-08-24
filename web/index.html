@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ViennaGeoAI — ask natural-language questions about official Vienna geospatial open data.">
+  <title>ViennaGeoAI · Ask the map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">V</div>
+      <div>
+        <div class="brand-name">ViennaGeoAI</div>
+        <div class="brand-subtitle">Ask Vienna's map</div>
+      </div>
+    </div>
+    <div class="status-row" aria-label="Service status">
+      <span class="status-chip"><span class="status-dot" id="api-dot"></span>PoGeo</span>
+      <span class="status-chip"><span class="status-dot" id="ai-dot"></span><span id="model-label">Ollama</span></span>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <section class="map-panel" aria-label="Interactive Vienna map">
+      <div class="map-toolbar">
+        <div>
+          <strong>Explore Vienna</strong>
+          <span id="map-hint">Click the map to select a point, then ask a question.</span>
+        </div>
+        <div class="toolbar-actions">
+          <button class="icon-button" id="locate-button" type="button" title="Use my location" aria-label="Use my location">◎</button>
+          <button class="icon-button" id="clear-button" type="button" title="Clear results" aria-label="Clear results">×</button>
+        </div>
+      </div>
+      <div id="map"></div>
+      <div class="map-footer">
+        <span id="selection-label">No point selected</span>
+        <span id="result-count">0 mapped features</span>
+      </div>
+    </section>
+
+    <aside class="assistant-panel" aria-label="ViennaGeoAI assistant">
+      <div class="assistant-header">
+        <div>
+          <span class="eyebrow">GROUNDED GEO-AI</span>
+          <h1>What do you want to know?</h1>
+        </div>
+        <p>Answers use allowlisted City of Vienna feature data and the current map context.</p>
+      </div>
+
+      <div class="quick-prompts" id="quick-prompts">
+        <button type="button" data-prompt="What useful places are visible in the current map area?">What's visible here?</button>
+        <button type="button" data-prompt="Show playgrounds in the current map area and summarize the results.">Playgrounds in view</button>
+        <button type="button" data-prompt="Find the nearest drinking fountains to the selected point.">Nearest water</button>
+        <button type="button" data-prompt="Find the nearest schools to the selected point and summarize them.">Schools nearby</button>
+      </div>
+
+      <section class="layers-section" aria-label="Data layers">
+        <div class="section-title">
+          <span>Official data layers</span>
+          <button type="button" id="refresh-layers" class="text-button">Refresh</button>
+        </div>
+        <div id="layer-list" class="layer-list"><span class="muted">Loading layers…</span></div>
+      </section>
+
+      <div id="messages" class="messages" aria-live="polite">
+        <div class="message assistant-message">
+          <div class="message-label">ViennaGeoAI</div>
+          <div class="message-body">Move or click the map and ask about playgrounds, schools, bicycle parking, drinking fountains, or swimming pools.</div>
+        </div>
+      </div>
+
+      <form id="chat-form" class="composer">
+        <label for="chat-input" class="sr-only">Ask ViennaGeoAI</label>
+        <textarea id="chat-input" rows="2" maxlength="4000" placeholder="Ask the map… e.g. Which playgrounds are near this point?"></textarea>
+        <div class="composer-footer">
+          <span id="context-label">Map context ready</span>
+          <button id="send-button" type="submit">Ask ViennaGeoAI <span aria-hidden="true">→</span></button>
+        </div>
+      </form>
+
+      <footer class="data-note">
+        Spatial facts come from configured Vienna Open Government Data WFS layers. AI output may summarize retrieved results; verify decisions against the source data.
+      </footer>
+    </aside>
+  </main>
+</body>
+</html>
