@@ -1,0 +1,54 @@
+name: Feature request
+description: Propose a focused improvement to ViennaGeoAI
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: use_case
+    attributes:
+      label: Use case
+      description: What user problem or workflow should this improve?
+      placeholder: Explain the concrete ViennaGeoAI use case.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the behavior, UI, data layer, or integration you would like to add.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Best repository scope
+      description: Generic geospatial behavior usually belongs in PoGeo; Vienna-specific behavior belongs here.
+      options:
+        - ViennaGeoAI-specific
+        - PoGeo core / generic geospatial capability
+        - Unsure
+    validations:
+      required: true
+
+  - type: textarea
+    id: data
+    attributes:
+      label: Data/source considerations
+      description: If this needs a new dataset, provide the official endpoint/feature type and any attribution or licensing information.
+      placeholder: City of Vienna WFS layer, source terms, etc.
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Optional alternatives or workarounds you considered.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and pull requests for a similar proposal.
+          required: true
