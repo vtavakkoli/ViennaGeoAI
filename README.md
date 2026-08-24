@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/viennageoai-screenshot.svg" alt="ViennaGeoAI application interface" width="100%">
+  <img src="ViennaGeoAI_Screenshot.png" alt="ViennaGeoAI application interface" width="100%">
 </p>
 
 ViennaGeoAI is a Dockerized geospatial AI application built on [PoGeo](https://github.com/vtavakkoli/PoGeo). It combines official Vienna Open Government Data, an interactive Leaflet map, explicit map context, and an Ollama tool-calling model. The model is not asked to guess spatial facts from pixels: it selects validated geospatial tools and receives GeoJSON-backed results from configured City of Vienna sources.
