@@ -1,0 +1,19 @@
+ViennaGeoAI
+Copyright 2026 Vahid Tavakkoli
+
+This product includes software developed for the ViennaGeoAI project and is
+licensed under the Apache License, Version 2.0.
+
+ViennaGeoAI retrieves external geospatial data and map tiles at runtime.
+Those third-party datasets, services, names, logos, map tiles, and other
+external materials are not relicensed by this repository and remain subject
+to their respective terms and attribution requirements.
+
+Relevant external services currently include:
+- City of Vienna Open Government Data / WFS services
+- basemap.at / City of Vienna map services
+- OpenStreetMap when selected as an alternative basemap
+- Ollama and the configured model provider
+
+The ViennaGeoAI name and project artwork are part of this repository. The
+Apache-2.0 software license does not grant rights to third-party trademarks.
