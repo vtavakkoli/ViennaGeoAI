@@ -24,7 +24,7 @@ services:
     build:
       context: .
       args:
-        POGEO_REF: ${POGEO_REF:-feature/wfs-provider}
+        POGEO_REF: ${POGEO_REF:-master}
     environment:
       POGEO_APP_NAME: ViennaGeoAI
       POGEO_ENVIRONMENT: ${POGEO_ENVIRONMENT:-development}
