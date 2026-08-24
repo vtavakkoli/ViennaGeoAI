@@ -23,11 +23,18 @@ jobs:
       - name: Start stack and wait for health
         run: docker compose up -d --wait --wait-timeout 90 postgis app
 
-      - name: Verify API, Vienna WFS, and UI
+      - name: Verify API, live Vienna WFS, and UI
         run: |
           curl --fail --retry 6 --retry-delay 2 --retry-all-errors http://localhost:8080/health
           curl --fail http://localhost:8080/collections | python -c 'import json,sys; data=json.load(sys.stdin); ids={x["id"] for x in data["collections"]}; required={"playgrounds","schools","bicycle_parking","drinking_fountains","swimming_pools"}; assert required <= ids, (required-ids)'
-          curl --fail --retry 3 --retry-delay 2 --retry-all-errors 'http://localhost:8080/collections/playgrounds/items?bbox=16.30%2C48.17%2C16.44%2C48.27&limit=3' | python -c 'import json,sys; data=json.load(sys.stdin); assert data["type"] == "FeatureCollection"; assert len(data["features"]) > 0; assert len(data["features"]) <= 3'
+          response_file=$(mktemp)
+          status=$(curl --silent --show-error --output "$response_file" --write-out '%{http_code}' 'http://localhost:8080/collections/playgrounds/items?bbox=16.30%2C48.17%2C16.44%2C48.27&limit=3')
+          if [ "$status" != "200" ]; then
+            echo "ViennaGeoAI WFS proxy returned HTTP $status"
+            cat "$response_file"
+            exit 1
+          fi
+          python -c 'import json,sys; data=json.load(sys.stdin); assert data["type"] == "FeatureCollection"; assert 0 < len(data["features"]) <= 3' < "$response_file"
           curl --fail http://localhost:8080/ | grep -q "ViennaGeoAI"
 
       - name: Logs
