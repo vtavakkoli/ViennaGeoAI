@@ -24,7 +24,7 @@ services:
     build:
       context: .
       args:
-        POGEO_REF: ${POGEO_REF:-master}
+        POGEO_REF: ${POGEO_REF:-f3d4e02f2415182b9a85f9cf6a00be1209d047b1}
     environment:
       POGEO_APP_NAME: ViennaGeoAI
       POGEO_ENVIRONMENT: ${POGEO_ENVIRONMENT:-development}

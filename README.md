@@ -1,56 +1,65 @@
-# ViennaGeoAI
+<p align="center">
+  <img src="web/assets/viennageoai-logo.svg" width="92" alt="ViennaGeoAI logo">
+</p>
 
-**Ask Vienna's map in natural language.** ViennaGeoAI is a Dockerized geospatial AI application built on [PoGeo](https://github.com/vtavakkoli/PoGeo). It combines an interactive Vienna map, official City of Vienna Open Government Data WFS layers, and an Ollama tool-calling model.
+<h1 align="center">ViennaGeoAI</h1>
 
-The default model is **`gemma4:31b-cloud`** through the Ollama daemon running on the host machine.
+<p align="center"><strong>Ask Vienna's map. Get grounded, mapped answers.</strong></p>
 
-## What it does
+<p align="center">
+  Interactive Vienna map · official City of Vienna WFS/OGD · PoGeo tool calling · Ollama <code>gemma4:31b-cloud</code>
+</p>
 
-- interactive Leaflet map centered on Vienna
-- current map bounding box passed to the AI as spatial context
-- click-to-select a WGS84 point for nearest-place questions
-- browser geolocation support
-- direct loading of official Vienna WFS layers in the current view
-- natural-language questions grounded through PoGeo tools
-- GeoJSON result overlays and feature popups
-- visible tool-execution summaries
-- responsive desktop/mobile UI
-- Docker Compose deployment with health checks and security hardening
-- CI smoke test that builds and boots the complete application stack
+<p align="center">
+  <img src="docs/viennageoai-screenshot.svg" alt="ViennaGeoAI application interface" width="100%">
+</p>
+
+ViennaGeoAI is a Dockerized geospatial AI application built on [PoGeo](https://github.com/vtavakkoli/PoGeo). It combines official Vienna Open Government Data, an interactive Leaflet map, explicit map context, and an Ollama tool-calling model. The model is not asked to guess spatial facts from pixels: it selects validated geospatial tools and receives GeoJSON-backed results from configured City of Vienna sources.
+
+## Highlights
+
+- **Professional map workspace** with dedicated official-data, map, and AI panels.
+- **Multi-layer exploration**: display several official Vienna datasets at the same time.
+- **Map-aware AI context**: viewport, zoom, selected point, and visible collections are sent with every question.
+- **Grounded tool calling** through PoGeo instead of arbitrary SQL or arbitrary remote URLs.
+- **Official Vienna WFS 1.1 / GeoJSON** with CRS-qualified `EPSG:4326` BBOX requests.
+- **Ollama host integration** with `gemma4:31b-cloud` as the default model.
+- **SVG visual identity** including application logo and browser favicon.
+- **Responsive UI** for desktop, tablet, and mobile layouts.
+- **Docker Compose** health checks, non-root app container, read-only filesystem, and bounded requests.
+- **Live CI verification** against the configured Vienna playground layer.
 
 ## Architecture
 
 ```text
 Browser
   │
-  ├── Leaflet + Vienna basemap
+  ├── ViennaGeoAI UI
+  │     ├── official layer explorer
+  │     ├── Leaflet map + selected point
+  │     └── grounded AI chat
   │
-  └── ViennaGeoAI UI
-          │
-          ▼
-       PoGeo API
-          │
-          ├── validated geospatial tool registry
-          │       │
-          │       └── City of Vienna WFS
-          │             data.wien.gv.at
-          │
-          └── Ollama API
-                  │
-                  ▼
-       host.docker.internal:11434
-                  │
-                  ▼
-          gemma4:31b-cloud
+  ▼
+PoGeo API
+  │
+  ├── validated geospatial tools
+  │      └── City of Vienna WFS 1.1
+  │             data.wien.gv.at
+  │
+  └── Ollama /api/chat
+         │
+         ▼
+host.docker.internal:11434
+         │
+         ▼
+ gemma4:31b-cloud
 ```
 
-The model never receives arbitrary SQL or arbitrary WFS URLs. Sources, feature types, properties, timeouts, and result limits are defined in the application catalog.
+The Vienna-specific catalog remains in this repository. Generic WFS, MCP, REST, spatial-query, and Ollama tool logic stays in PoGeo.
 
-## Included Vienna data layers
+## Verified Vienna layers
 
-ViennaGeoAI uses Vienna WFS **1.1.0** with GeoJSON (`application/json`). The City of Vienna GetCapabilities document advertises both WFS 1.0.0 and 1.1.0, identifies 1.1.0 as the service version, and explicitly advertises `application/json` and `json` for `GetFeature`. For spatial queries PoGeo sends a CRS-qualified WFS 1.1 BBOX such as `16.30,48.17,16.44,48.27,EPSG:4326`; this is the form verified to return the expected Vienna features.
-
-The layer identifiers below were verified against the current Vienna WFS capabilities in August 2026.
+ViennaGeoAI currently exposes these allowlisted feature types:
 
 | Layer | Vienna WFS feature type |
 |---|---|
@@ -60,23 +69,35 @@ The layer identifiers below were verified against the current Vienna WFS capabil
 | Drinking fountains | `ogdwien:TRINKBRUNNENOGD` |
 | Swimming pools | `ogdwien:SCHWIMMBADOGD` |
 
-Additional Vienna OGD layers can be added in `config/collections.yaml` without changing the AI tool surface.
+The application uses WFS **1.1.0**, `EPSG:4326`, and `application/json`. PoGeo sends map windows in the verified CRS-qualified form:
+
+```text
+16.30,48.17,16.44,48.27,EPSG:4326
+```
+
+That final CRS value is important for the current Vienna GeoServer behavior.
+
+## PoGeo revision policy
+
+ViennaGeoAI deliberately pins the PoGeo core instead of installing a floating `master` branch inside a cacheable Docker layer.
+
+Current verified revision:
+
+```text
+f3d4e02f2415182b9a85f9cf6a00be1209d047b1
+```
+
+This revision contains the WFS 1.1 CRS-qualified BBOX handling and structured upstream WFS errors. When adopting a newer PoGeo build, update `POGEO_REF` intentionally and let CI re-run the live Vienna WFS check.
 
 ## Quick start
 
-### 1. Prerequisites
+### 1. Requirements
 
-- Docker with Docker Compose
+- Docker + Docker Compose
 - Ollama installed and running on the host
-- an Ollama account with access to Ollama Cloud models
+- an Ollama account with access to cloud models
 
-Verify the requested model from the host:
-
-```bash
-ollama run gemma4:31b-cloud
-```
-
-On Windows PowerShell you can also verify the local Ollama API directly:
+Verify Ollama first:
 
 ```powershell
 Invoke-RestMethod -Uri "http://localhost:11434/api/generate" `
@@ -90,11 +111,9 @@ Invoke-RestMethod -Uri "http://localhost:11434/api/generate" `
   } | ConvertTo-Json)
 ```
 
-This `/api/generate` request is useful as a connectivity/model test. ViennaGeoAI itself uses Ollama's `/api/chat` endpoint because the application needs chat history and tool/function calling for geospatial queries.
+ViennaGeoAI itself uses Ollama's `/api/chat` endpoint because the application needs conversation history and function/tool calling.
 
-You can stop the interactive prompt after the model is confirmed. The ViennaGeoAI container talks to the host Ollama daemon at port `11434`.
-
-> `gemma4:31b-cloud` is an Ollama **Cloud** model. The Ollama API endpoint remains local on your computer, but inference for this model is cloud-backed rather than running the 31B weights entirely on your GPU.
+> `gemma4:31b-cloud` is an Ollama Cloud model. The Ollama daemon/API is local on your computer, while model inference is cloud-backed.
 
 ### 2. Configure
 
@@ -102,16 +121,16 @@ You can stop the interactive prompt after the model is confirmed. The ViennaGeoA
 cp .env.example .env
 ```
 
-The important defaults are:
+Important defaults:
 
 ```dotenv
+APP_PORT=8080
 OLLAMA_BASE_URL=http://host.docker.internal:11434
 OLLAMA_MODEL=gemma4:31b-cloud
-APP_PORT=8080
-POGEO_REF=master
+POGEO_REF=f3d4e02f2415182b9a85f9cf6a00be1209d047b1
 ```
 
-### 3. Start
+### 3. Build and start
 
 ```bash
 docker compose up --build -d
@@ -123,140 +142,121 @@ Open:
 http://localhost:8080
 ```
 
-Check the services:
-
-```bash
-docker compose ps
-curl http://localhost:8080/health
-curl http://localhost:8080/api/ai/status
-```
-
-Stop everything:
+For the first build after upgrading from an older floating-PoGeo version, a clean rebuild is recommended:
 
 ```bash
 docker compose down
+docker compose build --no-cache app
+docker compose up -d
 ```
 
-Remove the development PostGIS volume as well:
+## How to use it
 
-```bash
-docker compose down -v
-```
+1. Toggle one or more official Vienna layers in the left data panel.
+2. Move the map to the area you want to investigate.
+3. Click the map when the question is relative to a specific point.
+4. Ask ViennaGeoAI in natural language.
+5. Inspect the returned GeoJSON features directly on the map.
 
-## Using the application
-
-1. Move the map to the area you are interested in.
-2. Click a point if the question is about something *near this location*.
-3. Optionally click one of the official layer chips to inspect raw mapped features.
-4. Ask a natural-language question.
-
-Examples:
+Example questions:
 
 ```text
-Show playgrounds in the current map area and summarize them.
+Show playgrounds and drinking fountains visible in this area.
 ```
 
 ```text
-Find the nearest drinking fountains to the selected point.
+Which schools are closest to the selected point?
 ```
 
 ```text
-Which schools are near this point?
+Compare bicycle parking with playground availability in the current viewport.
 ```
 
 ```text
-Show bicycle parking visible on the map.
+Find the nearest drinking fountains to this point and map the results.
 ```
 
-The UI sends the current bounding box, zoom level, visible collections, and selected point to PoGeo. The LLM then chooses from the allowlisted geospatial tools and the resulting GeoJSON is drawn back on the map.
+## Health and troubleshooting
 
-## Troubleshooting
-
-### Ollama works but a map query fails
-
-Check the two paths separately:
+Check each path independently:
 
 ```powershell
+Invoke-RestMethod http://localhost:8080/health
 Invoke-RestMethod http://localhost:8080/api/ai/status
 Invoke-RestMethod http://localhost:8080/collections
 ```
 
-Then test a live Vienna layer through ViennaGeoAI:
+Test Vienna WFS through the application:
 
 ```powershell
 Invoke-RestMethod "http://localhost:8080/collections/playgrounds/items?bbox=16.30,48.17,16.44,48.27&limit=3"
 ```
 
-If `/api/ai/status` is healthy but a collection request fails, the problem is the geodata/WFS path rather than Ollama. The web UI handles non-JSON backend errors without reporting them as malformed Ollama JSON.
+A healthy Ollama call does **not** imply the Vienna WFS path is healthy, and vice versa. The frontend keeps those failures separate instead of reporting every backend error as malformed Ollama JSON.
+
+### If logs still show the old four-value BBOX
+
+Old behavior looks like this:
+
+```text
+bbox=16.30,48.17,16.44,48.27
+```
+
+The verified build should internally send:
+
+```text
+bbox=16.30,48.17,16.44,48.27,EPSG:4326
+```
+
+If you still see the old form, rebuild the `app` image without cache and confirm the pinned PoGeo revision:
+
+```bash
+docker compose build --no-cache app
+docker compose run --rm --no-deps app cat /usr/local/share/viennageoai-pogeo-ref
+```
 
 ## Configuration
 
-Application configuration is intentionally small:
-
-```text
-config/collections.yaml   Vienna WFS allowlist
-web/index.html            application shell
-web/styles.css            responsive UI
-web/app.js                map and chat client
-compose.yaml              runtime services
-Dockerfile                PoGeo-based application image
-```
-
-Useful environment variables:
-
 | Variable | Default | Purpose |
 |---|---|---|
-| `APP_PORT` | `8080` | host web port |
-| `OLLAMA_MODEL` | `gemma4:31b-cloud` | Ollama model |
-| `OLLAMA_BASE_URL` | `http://host.docker.internal:11434` | local Ollama daemon from the container |
+| `APP_PORT` | `8080` | published web port |
+| `OLLAMA_MODEL` | `gemma4:31b-cloud` | tool-calling model |
+| `OLLAMA_BASE_URL` | `http://host.docker.internal:11434` | host Ollama daemon from Docker |
 | `OLLAMA_TIMEOUT_SECONDS` | `300` | AI request timeout |
 | `WFS_TIMEOUT_SECONDS` | `30` | Vienna WFS timeout |
-| `MAX_FEATURES` | `5000` | global feature cap |
-| `MAX_TOOL_ITERATIONS` | `6` | maximum tool loop iterations per question |
-| `POGEO_REF` | `master` | PoGeo revision used to build the application |
+| `MAX_FEATURES` | `5000` | global WFS feature cap |
+| `MAX_TOOL_ITERATIONS` | `6` | maximum agent tool-loop iterations |
+| `POGEO_REF` | pinned commit | verified PoGeo revision used by the image |
 
-The Compose configuration adds `host.docker.internal:host-gateway`, so the same host-Ollama configuration works on Docker Desktop and modern Linux Docker installations.
+## Repository layout
+
+```text
+config/collections.yaml        Vienna WFS allowlist
+web/index.html                 application shell
+web/styles.css                 responsive visual system
+web/app.js                     map, layers, status, and chat client
+web/assets/*.svg               ViennaGeoAI logo + favicon
+docs/viennageoai-screenshot.svg README application screenshot
+compose.yaml                   runtime stack
+Dockerfile                     pinned PoGeo application image
+.github/workflows/ci.yml       live integration smoke test
+```
 
 ## Security model
 
-ViennaGeoAI inherits PoGeo's read-only tool model and adds deployment-level restrictions:
-
 - remote WFS endpoints are catalog-controlled
-- remote properties are allowlisted
-- arbitrary SQL is not exposed
-- arbitrary remote URLs are not exposed to the model
-- result counts and tool iterations are bounded
-- WFS and Ollama requests have explicit timeouts
-- the application container runs as a non-root user
+- feature properties are allowlisted
+- arbitrary SQL is not exposed to the model
+- arbitrary WFS URLs are not exposed to the model
+- request sizes, result counts, and tool iterations are bounded
+- WFS and Ollama calls have explicit timeouts
+- the app container runs as a non-root user
 - the application filesystem is read-only at runtime
 - `no-new-privileges` is enabled
-- only the application port is published; PostGIS remains internal to Compose
+- PostGIS remains internal to the Compose network
 
-For public production deployment, add TLS, authentication/authorization, rate limiting, persistent audit logs, and network egress controls.
-
-## Development and CI
-
-Validate Compose locally:
-
-```bash
-docker compose config --quiet
-```
-
-Build and run the same smoke path as CI:
-
-```bash
-docker compose build app
-docker compose up -d --wait postgis app
-curl http://localhost:8080/health
-curl http://localhost:8080/collections
-```
-
-The GitHub Actions workflow validates Compose, builds the application image from PoGeo `master`, waits for the stack health checks, verifies the configured Vienna collections, performs a live Vienna WFS 1.1 query through PoGeo, and checks that the UI is served.
-
-## PoGeo relationship
-
-Vienna-specific behavior stays in this repository. Generic WFS access, validation, AI tool calling, MCP, REST endpoints, and spatial provider logic belong in PoGeo. This keeps ViennaGeoAI a clean real-world smart-city application while PoGeo remains reusable for other cities and geospatial services.
+For a public deployment, add TLS, user authentication/authorization, rate limiting, persistent audit logs, and explicit egress policy.
 
 ## Data and attribution
 
-Geospatial feature data is retrieved from the City of Vienna Open Government Data WFS (`data.wien.gv.at`). The default background map uses basemap.at / City of Vienna services. Review the applicable City of Vienna and basemap.at data terms before redistribution or production use.
+Feature data is retrieved from the City of Vienna Open Government Data WFS at `data.wien.gv.at`. The default background map uses basemap.at / City of Vienna services. Review the applicable Vienna OGD and basemap.at terms before redistribution or production deployment.

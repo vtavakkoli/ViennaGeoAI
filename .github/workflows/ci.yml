@@ -20,6 +20,20 @@ jobs:
       - name: Build application
         run: docker compose build app
 
+      - name: Verify pinned PoGeo WFS behavior
+        run: |
+          docker compose run --rm --no-deps app python - <<'PY'
+          import inspect
+          from pathlib import Path
+          import pogeo.wfs
+
+          source = inspect.getsource(pogeo.wfs._bbox_param)
+          assert "values.append(collection.wfs_srs_name)" in source, source
+          ref = Path("/usr/local/share/viennageoai-pogeo-ref").read_text().strip()
+          assert ref == "f3d4e02f2415182b9a85f9cf6a00be1209d047b1", ref
+          print("Verified PoGeo revision:", ref)
+          PY
+
       - name: Start stack and wait for health
         run: docker compose up -d --wait --wait-timeout 90 postgis app
 
@@ -27,6 +41,7 @@ jobs:
         run: |
           curl --fail --retry 6 --retry-delay 2 --retry-all-errors http://localhost:8080/health
           curl --fail http://localhost:8080/collections | python -c 'import json,sys; data=json.load(sys.stdin); ids={x["id"] for x in data["collections"]}; required={"playgrounds","schools","bicycle_parking","drinking_fountains","swimming_pools"}; assert required <= ids, (required-ids)'
+
           response_file=$(mktemp)
           status=$(curl --silent --show-error --output "$response_file" --write-out '%{http_code}' 'http://localhost:8080/collections/playgrounds/items?bbox=16.30%2C48.17%2C16.44%2C48.27&limit=3')
           if [ "$status" != "200" ]; then
@@ -35,7 +50,10 @@ jobs:
             exit 1
           fi
           python -c 'import json,sys; data=json.load(sys.stdin); assert data["type"] == "FeatureCollection"; assert 0 < len(data["features"]) <= 3' < "$response_file"
-          curl --fail http://localhost:8080/ | grep -q "ViennaGeoAI"
+
+          curl --fail http://localhost:8080/ | grep -q "Ask Vienna"
+          curl --fail http://localhost:8080/static/assets/viennageoai-logo.svg | grep -q "ViennaGeoAI"
+          curl --fail http://localhost:8080/static/assets/favicon.svg | grep -q "linearGradient"
 
       - name: Logs
         if: failure()
