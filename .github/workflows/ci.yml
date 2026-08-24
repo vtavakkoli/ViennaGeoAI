@@ -23,34 +23,18 @@ jobs:
       - name: Start stack and wait for health
         run: docker compose up -d --wait --wait-timeout 90 postgis app
 
-      - name: Inspect Vienna WFS capabilities
-        run: |
-          curl --silent --show-error \
-            'https://data.wien.gv.at/daten/geo?service=WFS&request=GetCapabilities&version=1.1.0' \
-            --output /tmp/wfs-capabilities.xml
-          echo '--- Vienna WFS candidate feature types ---'
-          grep -oE '<(wfs:)?Name>[^<]+</(wfs:)?Name>' /tmp/wfs-capabilities.xml \
-            | sed -E 's#</?(wfs:)?Name>##g' \
-            | grep -Ei 'SPIEL|SCHUL|SCHOOL|FAHRRAD|RADABST|BIKE|TRINK|BRUNN|WASSER|SCHWIMM|BAD|POOL' \
-            | sort -u \
-            | head -n 200 || true
-          echo '--- Capability formats ---'
-          grep -oE '<ows:Value>[^<]+</ows:Value>|<Format>[^<]+</Format>' /tmp/wfs-capabilities.xml \
-            | sed -E 's#</?ows:Value>##g; s#</?Format>##g' \
-            | sort -u \
-            | head -n 100 || true
-
-      - name: Verify API, Vienna WFS, and UI
+      - name: Verify API, live Vienna WFS, and UI
         run: |
           curl --fail --retry 6 --retry-delay 2 --retry-all-errors http://localhost:8080/health
           curl --fail http://localhost:8080/collections | python -c 'import json,sys; data=json.load(sys.stdin); ids={x["id"] for x in data["collections"]}; required={"playgrounds","schools","bicycle_parking","drinking_fountains","swimming_pools"}; assert required <= ids, (required-ids)'
           response_file=$(mktemp)
           status=$(curl --silent --show-error --output "$response_file" --write-out '%{http_code}' 'http://localhost:8080/collections/playgrounds/items?bbox=16.30%2C48.17%2C16.44%2C48.27&limit=3')
-          echo "ViennaGeoAI WFS proxy status: $status"
-          cat "$response_file"
-          echo
-          test "$status" = "200"
-          python -c 'import json,sys; data=json.load(sys.stdin); assert data["type"] == "FeatureCollection"; assert len(data["features"]) > 0; assert len(data["features"]) <= 3' < "$response_file"
+          if [ "$status" != "200" ]; then
+            echo "ViennaGeoAI WFS proxy returned HTTP $status"
+            cat "$response_file"
+            exit 1
+          fi
+          python -c 'import json,sys; data=json.load(sys.stdin); assert data["type"] == "FeatureCollection"; assert 0 < len(data["features"]) <= 3' < "$response_file"
           curl --fail http://localhost:8080/ | grep -q "ViennaGeoAI"
 
       - name: Logs
