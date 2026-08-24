@@ -48,7 +48,7 @@ The model never receives arbitrary SQL or arbitrary WFS URLs. Sources, feature t
 
 ## Included Vienna data layers
 
-ViennaGeoAI currently uses Vienna WFS 1.1.0 with GeoJSON (`application/json`). The layer identifiers below are verified against the live Vienna WFS capabilities in August 2026.
+ViennaGeoAI uses Vienna WFS 1.0.0 with GeoJSON (`application/json`). WFS 1.0.0 is intentionally selected for this map application because its `EPSG:4326` BBOX coordinates preserve the Leaflet/GeoJSON longitude,latitude order. WFS 1.1 follows EPSG axis ordering and can invert those map bounds. The layer identifiers below were verified against the live Vienna WFS capabilities in August 2026.
 
 | Layer | Vienna WFS feature type |
 |---|---|
