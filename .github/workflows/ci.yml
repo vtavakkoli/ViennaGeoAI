@@ -23,46 +23,6 @@ jobs:
       - name: Start stack and wait for health
         run: docker compose up -d --wait --wait-timeout 90 postgis app
 
-      - name: Diagnose Vienna WFS spatial filtering
-        run: |
-          endpoint='https://data.wien.gv.at/daten/geo'
-          common='service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien%3ASPIELPLATZPUNKTOGD&srsName=EPSG%3A4326&outputFormat=application%2Fjson&maxFeatures=3'
-
-          curl --fail --silent --show-error "$endpoint?$common" -o /tmp/no-bbox.json
-          curl --fail --silent --show-error "$endpoint?$common&bbox=16.30%2C48.17%2C16.44%2C48.27%2CEPSG%3A4326" -o /tmp/lonlat-crs.json
-          curl --fail --silent --show-error "$endpoint?$common&bbox=48.17%2C16.30%2C48.27%2C16.44%2CEPSG%3A4326" -o /tmp/latlon-crs.json
-          curl --fail --silent --show-error "$endpoint?$common&cql_filter=BBOX%28SHAPE%2C16.30%2C48.17%2C16.44%2C48.27%2C%27EPSG%3A4326%27%29" -o /tmp/cql-bbox.json
-
-          curl --fail --silent --show-error \
-            "$endpoint?service=WFS&request=DescribeFeatureType&version=1.1.0&typeName=ogdwien%3ASPIELPLATZPUNKTOGD" \
-            -o /tmp/schema.xml
-
-          python - <<'PY'
-          import json
-          import xml.etree.ElementTree as ET
-
-          for label, path in [
-              ("no_bbox", "/tmp/no-bbox.json"),
-              ("lon_lat_bbox_with_crs", "/tmp/lonlat-crs.json"),
-              ("lat_lon_bbox_with_crs", "/tmp/latlon-crs.json"),
-              ("cql_bbox_shape", "/tmp/cql-bbox.json"),
-          ]:
-              with open(path, encoding="utf-8") as handle:
-                  data = json.load(handle)
-              features = data.get("features", [])
-              coords = [f.get("geometry", {}).get("coordinates") for f in features]
-              print(label, "count=", len(features), "coordinates=", coords)
-
-          root = ET.parse("/tmp/schema.xml").getroot()
-          geometry_fields = []
-          for element in root.iter():
-              name = element.attrib.get("name")
-              field_type = element.attrib.get("type", "")
-              if name and "gml:" in field_type:
-                  geometry_fields.append((name, field_type))
-          print("geometry_fields=", geometry_fields)
-          PY
-
       - name: Verify API, live Vienna WFS, and UI
         run: |
           curl --fail --retry 6 --retry-delay 2 --retry-all-errors http://localhost:8080/health
