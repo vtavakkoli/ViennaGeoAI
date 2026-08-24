@@ -118,7 +118,13 @@
 
   function featureTitle(feature) {
     const props = feature.properties || {};
-    return props.NAME || props.BASIS_TYP_TXT || props.ADRESSE || String(feature.id || "Vienna feature");
+    return props.NAME
+      || props.TYP_DETAIL
+      || props.ART_TXT
+      || props.BASIS_TYP_TXT
+      || props.STANDORT
+      || props.ADRESSE
+      || String(feature.id || "Vienna feature");
   }
 
   function popupContent(feature) {
@@ -131,7 +137,7 @@
 
     Object.entries(props)
       .filter(([key, value]) => value !== null && value !== "" && key !== "NAME")
-      .slice(0, 7)
+      .slice(0, 8)
       .forEach(([key, value]) => {
         const row = document.createElement("div");
         row.className = "popup-row";
