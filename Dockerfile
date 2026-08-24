@@ -1,6 +1,6 @@
 FROM python:3.12-slim AS runtime
 
-ARG POGEO_REF=feature/wfs-provider
+ARG POGEO_REF=master
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
