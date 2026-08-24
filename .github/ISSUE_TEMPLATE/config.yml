@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/vtavakkoli/ViennaGeoAI/security
+    about: Please use private security reporting when available instead of opening a public issue.
+  - name: PoGeo core
+    url: https://github.com/vtavakkoli/PoGeo/issues
+    about: Report generic WFS, MCP, REST, spatial-provider, or Ollama-agent issues in PoGeo when they are not Vienna-specific.
