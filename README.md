@@ -311,7 +311,7 @@ Citation metadata is provided in [CITATION.cff](CITATION.cff), which GitHub can 
 
 Suggested software citation:
 
-> Tavakkoli, V. (2026). *ViennaGeoAI: Grounded Natural-Language Access to Vienna Geospatial Open Data*. GitHub repository.
+> Tavakkoli, V. ,& Mohsenzadegan, K. (2026). *ViennaGeoAI: Grounded Natural-Language Access to Vienna Geospatial Open Data*. GitHub repository.
 
 If you publish a paper or derived benchmark using ViennaGeoAI, cite the exact commit or release used so the software configuration is reproducible.
 
