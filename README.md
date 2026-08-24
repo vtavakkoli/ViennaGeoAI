@@ -88,6 +88,7 @@ The important defaults are:
 OLLAMA_BASE_URL=http://host.docker.internal:11434
 OLLAMA_MODEL=gemma4:31b-cloud
 APP_PORT=8080
+POGEO_REF=master
 ```
 
 ### 3. Start
@@ -173,7 +174,7 @@ Useful environment variables:
 | `WFS_TIMEOUT_SECONDS` | `30` | Vienna WFS timeout |
 | `MAX_FEATURES` | `5000` | global feature cap |
 | `MAX_TOOL_ITERATIONS` | `6` | maximum tool loop iterations per question |
-| `POGEO_REF` | `feature/wfs-provider` | PoGeo revision used while the WFS PR is under review |
+| `POGEO_REF` | `master` | PoGeo revision used to build the application |
 
 The Compose configuration adds `host.docker.internal:host-gateway`, so the same host-Ollama configuration works on Docker Desktop and modern Linux Docker installations.
 
@@ -206,12 +207,12 @@ Build and run the same smoke path as CI:
 
 ```bash
 docker compose build app
-docker compose up -d postgis app
+docker compose up -d --wait postgis app
 curl http://localhost:8080/health
 curl http://localhost:8080/collections
 ```
 
-The GitHub Actions workflow validates Compose, builds the application image, boots the stack, verifies the configured Vienna collections, and checks that the UI is served.
+The GitHub Actions workflow validates Compose, builds the application image from PoGeo `master`, waits for the stack health checks, verifies the configured Vienna collections, performs a live Vienna WFS query, and checks that the UI is served.
 
 ## PoGeo relationship
 
