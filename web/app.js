@@ -116,6 +116,30 @@
     sendButton.textContent = value ? "Working…" : "Ask ViennaGeoAI →";
   }
 
+  async function readApiResponse(response) {
+    const text = await response.text();
+    if (!text) return {};
+
+    const contentType = response.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) {
+      try {
+        return JSON.parse(text);
+      } catch (_error) {
+        throw new Error(`Server returned invalid JSON (${response.status})`);
+      }
+    }
+
+    if (!response.ok) {
+      return { detail: text.trim() || `Request failed (${response.status})` };
+    }
+
+    try {
+      return JSON.parse(text);
+    } catch (_error) {
+      return { detail: text.trim() };
+    }
+  }
+
   function featureTitle(feature) {
     const props = feature.properties || {};
     return props.NAME
@@ -196,8 +220,8 @@
     list.innerHTML = '<span class="muted">Loading layers…</span>';
     try {
       const response = await fetch("/collections");
-      if (!response.ok) throw new Error(`Collections request failed (${response.status})`);
-      const data = await response.json();
+      const data = await readApiResponse(response);
+      if (!response.ok) throw new Error(data.detail || `Collections request failed (${response.status})`);
       state.collections = data.collections || [];
       list.replaceChildren();
       state.collections.forEach((collection) => {
@@ -221,7 +245,7 @@
     try {
       const bbox = bboxArray().join(",");
       const response = await fetch(`/collections/${encodeURIComponent(collectionId)}/items?bbox=${encodeURIComponent(bbox)}&limit=500`);
-      const data = await response.json();
+      const data = await readApiResponse(response);
       if (!response.ok) throw new Error(data.detail || `Layer request failed (${response.status})`);
       state.activeCollections.clear();
       state.activeCollections.add(collectionId);
@@ -229,7 +253,7 @@
       button.classList.add("active");
       renderFeatures(data, { fit: false });
     } catch (error) {
-      addError(`Could not load this layer: ${error.message}`);
+      addError(`Could not load this Vienna layer: ${error.message}`);
     } finally {
       button.disabled = false;
     }
@@ -245,9 +269,9 @@
 
     try {
       const response = await fetch("/api/ai/status");
-      const status = await response.json();
-      $("ai-dot").classList.toggle("ok", Boolean(status.available));
-      $("ai-dot").classList.toggle("warn", !status.available);
+      const status = await readApiResponse(response);
+      $("ai-dot").classList.toggle("ok", Boolean(response.ok && status.available));
+      $("ai-dot").classList.toggle("warn", !response.ok || !status.available);
       $("model-label").textContent = status.model || "Ollama";
     } catch (_error) {
       $("ai-dot").classList.add("warn");
@@ -275,9 +299,9 @@
           map_context: mapContext(),
         }),
       });
-      const data = await response.json();
+      const data = await readApiResponse(response);
       typing.remove();
-      if (!response.ok) throw new Error(data.detail || `AI request failed (${response.status})`);
+      if (!response.ok) throw new Error(data.detail || `ViennaGeoAI request failed (${response.status})`);
 
       addMessage("assistant", data.answer, data.tool_executions || []);
       state.history.push({ role: "user", content: text }, { role: "assistant", content: data.answer });
@@ -285,7 +309,7 @@
       if (data.feature_collection) renderFeatures(data.feature_collection);
     } catch (error) {
       typing.remove();
-      addError(`${error.message}. Check that local Ollama is running and that gemma4:31b-cloud is available to your Ollama account.`);
+      addError(`Request failed: ${error.message}. Ollama may still be healthy; check the AI status indicator and Vienna data connectivity.`);
     } finally {
       setBusy(false);
       input.focus();
