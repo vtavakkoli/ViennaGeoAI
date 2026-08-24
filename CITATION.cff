@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use ViennaGeoAI in research, teaching, or a derived project, please cite this software."
+title: "ViennaGeoAI: Grounded Natural-Language Access to Vienna Geospatial Open Data"
+type: software
+authors:
+  - family-names: Tavakkoli
+    given-names: Vahid
+repository-code: "https://github.com/vtavakkoli/ViennaGeoAI"
+license: Apache-2.0
+keywords:
+  - geoai
+  - geospatial ai
+  - natural language gis
+  - vienna
+  - smart city
+  - open government data
+  - wfs
+  - ogc
+  - ollama
+  - tool calling
+  - spatial reasoning

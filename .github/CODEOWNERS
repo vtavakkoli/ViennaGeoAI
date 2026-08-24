@@ -1,0 +1,8 @@
+# Default owner
+* @vtavakkoli
+
+# Integration-sensitive areas
+/config/ @vtavakkoli
+/Dockerfile @vtavakkoli
+/compose.yaml @vtavakkoli
+/.github/workflows/ @vtavakkoli

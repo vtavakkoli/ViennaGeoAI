@@ -1,0 +1,77 @@
+name: Bug report
+description: Report a reproducible ViennaGeoAI problem
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve ViennaGeoAI. For security-sensitive issues, follow SECURITY.md instead of opening a public issue.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What happened, and what did you expect instead?
+      placeholder: Describe the observed and expected behavior.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps
+      description: Provide the smallest reliable sequence that reproduces the problem.
+      placeholder: |
+        1. Start with ...
+        2. Open ...
+        3. Ask ...
+        4. Observe ...
+    validations:
+      required: true
+
+  - type: input
+    id: revision
+    attributes:
+      label: ViennaGeoAI revision
+      description: Commit SHA, branch, or release if known.
+      placeholder: main / commit SHA
+
+  - type: input
+    id: pogeo
+    attributes:
+      label: PoGeo revision
+      description: Output from /usr/local/share/viennageoai-pogeo-ref if relevant.
+      placeholder: f3d4e02...
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      options:
+        - Map/UI
+        - Vienna WFS/data layer
+        - Ollama/AI chat
+        - Docker/Compose
+        - CI
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs or screenshots
+      description: Remove secrets, tokens, personal data, and unrelated log content.
+      render: shell
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and pull requests for the same problem.
+          required: true
+        - label: I removed secrets, tokens, and private information from the report.
+          required: true
