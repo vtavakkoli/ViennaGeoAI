@@ -48,9 +48,11 @@ The model never receives arbitrary SQL or arbitrary WFS URLs. Sources, feature t
 
 ## Included Vienna data layers
 
+ViennaGeoAI currently uses Vienna WFS 1.1.0 with GeoJSON (`application/json`). The layer identifiers below are verified against the live Vienna WFS capabilities in August 2026.
+
 | Layer | Vienna WFS feature type |
 |---|---|
-| Playgrounds | `ogdwien:SPIELPLATZOGD` |
+| Playgrounds | `ogdwien:SPIELPLATZPUNKTOGD` |
 | Schools | `ogdwien:SCHULEOGD` |
 | Bicycle parking | `ogdwien:FAHRRADABSTELLANLAGEOGD` |
 | Drinking fountains | `ogdwien:TRINKBRUNNENOGD` |
@@ -71,6 +73,22 @@ Verify the requested model from the host:
 ```bash
 ollama run gemma4:31b-cloud
 ```
+
+On Windows PowerShell you can also verify the local Ollama API directly:
+
+```powershell
+Invoke-RestMethod -Uri "http://localhost:11434/api/generate" `
+  -Method Post `
+  -ContentType "application/json" `
+  -Body (@{
+    model="gemma4:31b-cloud"
+    prompt="Why is the sky blue? Return only JSON with short_answer and explanation."
+    format="json"
+    stream=$false
+  } | ConvertTo-Json)
+```
+
+This `/api/generate` request is useful as a connectivity/model test. ViennaGeoAI itself uses Ollama's `/api/chat` endpoint because the application needs chat history and tool/function calling for geospatial queries.
 
 You can stop the interactive prompt after the model is confirmed. The ViennaGeoAI container talks to the host Ollama daemon at port `11434`.
 
@@ -149,6 +167,25 @@ Show bicycle parking visible on the map.
 ```
 
 The UI sends the current bounding box, zoom level, visible collections, and selected point to PoGeo. The LLM then chooses from the allowlisted geospatial tools and the resulting GeoJSON is drawn back on the map.
+
+## Troubleshooting
+
+### Ollama works but a map query fails
+
+Check the two paths separately:
+
+```powershell
+Invoke-RestMethod http://localhost:8080/api/ai/status
+Invoke-RestMethod http://localhost:8080/collections
+```
+
+Then test a live Vienna layer through ViennaGeoAI:
+
+```powershell
+Invoke-RestMethod "http://localhost:8080/collections/playgrounds/items?bbox=16.30,48.17,16.44,48.27&limit=3"
+```
+
+If `/api/ai/status` is healthy but a collection request fails, the problem is the geodata/WFS path rather than Ollama. The web UI handles non-JSON backend errors without reporting them as malformed Ollama JSON.
 
 ## Configuration
 
