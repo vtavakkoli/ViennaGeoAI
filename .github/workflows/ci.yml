@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  compose-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate Compose
+        run: docker compose config --quiet
+
+      - name: Build application
+        run: docker compose build app
+
+      - name: Start stack
+        run: docker compose up -d postgis app
+
+      - name: Verify API and configured Vienna layers
+        run: |
+          curl --fail --retry 24 --retry-delay 2 --retry-connrefused http://localhost:8080/health
+          curl --fail http://localhost:8080/collections | python -c 'import json,sys; data=json.load(sys.stdin); ids={x["id"] for x in data["collections"]}; required={"playgrounds","schools","bicycle_parking","drinking_fountains","swimming_pools"}; assert required <= ids, (required-ids)'
+          curl --fail http://localhost:8080/ | grep -q "ViennaGeoAI"
+
+      - name: Logs
+        if: failure()
+        run: docker compose logs --no-color
+
+      - name: Stop stack
+        if: always()
+        run: docker compose down -v
