@@ -1,7 +1,22 @@
 .git
 .github
 .env
+.env.*
 *.log
 __pycache__
 .pytest_cache
+.mypy_cache
+.ruff_cache
 reports
+
+# Repository/documentation assets are not copied into the runtime image.
+*.md
+LICENSE
+NOTICE
+CITATION.cff
+ViennaGeoAI_Screenshot.png
+docs
+
+# Local editor and metadata files
+.editorconfig
+.gitignore
