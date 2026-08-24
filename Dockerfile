@@ -1,4 +1,4 @@
-FROM python:3.12-slim AS runtime
+FROM python:3.14-slim AS runtime
 
 # Pin the geospatial core so Docker cannot silently reuse an older floating-master
 # install. Bump this deliberately when ViennaGeoAI adopts a newer PoGeo revision.
